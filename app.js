@@ -3,6 +3,8 @@ const app = express();
 const port = 3000;
 const { addUser } = require("./database/services"); // Henter funkjsonen som vi eksporterte i services
 const bodyParser = require("body-parser"); // Hjelper oss å hente ut req.body
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 // Middleware for å parse URL-encoded data (f.eks. fra skjemaer)
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,7 +34,13 @@ app.get("/signup", (req, res) => {
 app.post("/signup", (req, res) => {
     const email = req.body.email; 
     const password = req.body.password;
-    addUser(email, password); 
+
+    bcrypt.hash(password, saltRounds, function(err, hashedPassword) {
+        // Store hash in your password DB.
+        addUser(email, hashedPassword); 
+    });
+
+    
     return res.redirect("/signup");
 });
 
